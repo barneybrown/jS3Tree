@@ -1,30 +1,18 @@
 <!-- 
-  Amazon S3 Bucket Tree
+  jS3Tree: show contents of S3 bucket in a collapsible tree listing.
   By Tony Mann
   
-  ===================================================================
-  Based on Amazon S3 Bucket listing by Francesco Pasqualini.
-  Copyright (C) 2008 Francesco Pasqualini 
+  Place this file at the root of the bucket.
   
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  ====================================================================
+  Inspired by on Amazon S3 Bucket listing by Francesco Pasqualini.
+  http://aws.amazon.com/code/Amazon-S3/1713
 -->
 
 <html>
   <head>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    
     <style>
       ul            { margin-bottom:0; margin-top:0; padding-left:20px; list-style:none }
       ul.root       { padding-left: 0 }
@@ -41,13 +29,14 @@
             url: window.location.protocol + '//' + window.location.hostname,
             dataFormat: 'xml',
             success: function(data) {
-              var filesXML = $(data).find('Contents');
+              var contents = $(data).find('Contents');
               var files = [];
         
-              for (i = 0; i < filesXML.length; i++) {
-                files.push($(filesXML[i]).find('Key')[0].firstChild.data);
+              for (i = 0; i < contents.length; i++) {
+                files.push($(contents[i]).find('Key').text());
               }
               
+              files.sort();
               generateListing(files);
             }
           });
@@ -99,7 +88,7 @@
 
       function convertListToTree() {
         $('.dir').each(function(i) {
-          var parent   = $(this);
+          var parent = $(this);
           var children = parent.next().hide();
           parent.find('a').click(function() {
             children.slideToggle('fast');
