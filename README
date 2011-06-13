@@ -1,0 +1,6 @@
+Shows contents of an S3 bucket in a collapsible tree listing.
+
+To use, place the index.html file in the root of your bucket.
+Then tell users to go to BUCKET_NAME.s3.amazonaws.com/index.html.
+
+NOTE: If you have turned on the "website" feature for this bucket, then this script will not work.

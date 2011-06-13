@@ -1,0 +1,119 @@
+<!-- 
+  Amazon S3 Bucket Tree
+  By Tony Mann
+  
+  ===================================================================
+  Based on Amazon S3 Bucket listing by Francesco Pasqualini.
+  Copyright (C) 2008 Francesco Pasqualini 
+  
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ====================================================================
+-->
+
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <style>
+      ul            { margin-bottom:0; margin-top:0; padding-left:20px; list-style:none }
+      ul.root       { padding-left: 0 }
+      .dir a        { font-weight:bold; text-decoration: none; color: #2200cc }
+      .file a       { color: black; text-decoration: none }
+      .file a:hover { text-decoration: underline }
+    </style>
+
+    <title>File listing</title>
+  
+    <script>
+      $(function() {
+          $.ajax({
+            url: window.location.protocol + '//' + window.location.hostname,
+            dataFormat: 'xml',
+            success: function(data) {
+              var filesXML = $(data).find('Contents');
+              var files = [];
+        
+              for (i = 0; i < filesXML.length; i++) {
+                files.push($(filesXML[i]).find('Key')[0].firstChild.data);
+              }
+              
+              generateListing(files);
+            }
+          });
+      });
+
+      function generateListing(files) {
+        var out = '<ul class="root">';
+        var dirs = [];
+        var dir = '';
+
+        for (i = 0; i < files.length; i++) {
+          var name = files[i];
+          
+          if ('/' + name == window.location.pathname) {
+            continue;
+          }
+
+          while (dir.length > 0 && name.substring(0, dir.length) != dir) {
+            dir = dirs.pop();
+            out = out + '</ul>';
+          }
+
+          var klass = 'file';
+          var title = name.substring(dir.length);
+          var url   = name;
+          
+          var match = /^(.*)\/$/.exec(title);
+
+          if (match) {
+            klass = 'dir';
+            title = match[1];
+            url = '#';
+            
+            dirs.push(dir);
+            dir = name;
+          }
+
+          out = out + '<li class="' + klass + '"><a href="' + url + '">' + title + '</a>' + '</li>';
+
+          if (klass == 'dir') {
+            out = out + '<ul>';
+          }
+        }
+
+        out = out + "</ul>";
+        $('#file_list').html(out);
+        convertListToTree();
+      }
+
+      function convertListToTree() {
+        $('.dir').each(function(i) {
+          var parent   = $(this);
+          var children = parent.next().hide();
+          parent.find('a').click(function() {
+            children.slideToggle('fast');
+            return false;
+          });
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <h2>File listing</h2>
+    <div id="file_list">
+      Please wait...
+    </div>
+  </body>
+</html>
+
